@@ -1,0 +1,30 @@
+{
+  "account_blocked": "account",
+  "freeze_account": "account",
+  "pin_change": "account",
+  "user_name": "account",
+  "change_user_name": "account",
+  "reset_settings": "account",
+
+  "application_status": "process",
+  "order_status": "process",
+  "pto_request": "process",
+  "pto_request_status": "process",
+  "schedule_meeting": "process",
+  "meeting_schedule": "process",
+  "direct_deposit": "process",
+  "next_holiday": "process",
+  "taxes": "process",
+
+  "report_fraud": "complaint",
+  "report_lost_card": "complaint",
+  "damaged_card": "complaint",
+  "card_declined": "complaint",
+  "international_fees": "complaint",
+
+  "sync_device": "technical",
+  "change_language": "technical",
+  "update_playlist": "technical",
+  "whisper_mode": "technical",
+  "change_volume": "technical"
+}

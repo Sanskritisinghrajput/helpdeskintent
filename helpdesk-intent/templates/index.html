@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Helpdesk Intent Assistant</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9 11h6M9 14h4"/></svg>
+      </div>
+      <div>
+        <h1>Helpdesk Intent Assistant</h1>
+        <p>Route every query to the right desk &mdash; or hand it to a human when unsure.</p>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="classify" role="tab">Classify</button>
+      <button class="tab" data-tab="compare" role="tab">Compare models</button>
+      <button class="tab" data-tab="bench" role="tab">Benchmarks</button>
+      <button class="tab" data-tab="about" role="tab">How it works</button>
+    </nav>
+  </header>
+
+  <main>
+    <div id="banner" class="notice hidden"></div>
+
+    <!-- CLASSIFY -->
+    <section id="tab-classify" class="panel active">
+      <div class="grid-2">
+        <div class="card">
+          <h2>Ask the helpdesk</h2>
+          <label class="field-label" for="query">Type a student / staff query</label>
+          <textarea id="query" rows="4" maxlength="500" placeholder="e.g. I need a duplicate degree certificate, how do I apply?"></textarea>
+          <div class="row between small muted"><span id="counter">0 / 500</span><span>Ctrl + Enter to classify</span></div>
+
+          <div class="chips" id="examples"></div>
+
+          <label class="field-label">Model</label>
+          <div class="segmented" id="modelSeg"></div>
+
+          <div class="row between">
+            <label class="field-label" for="thr">Confidence threshold for fallback</label>
+            <span class="pill" id="thrVal">0.60</span>
+          </div>
+          <input type="range" id="thr" min="0" max="1" step="0.01" value="0.6">
+          <div class="row between small muted">
+            <span>0 &middot; never fall back</span>
+            <button class="link" id="thrReset" type="button">use tuned value</button>
+            <span>1 &middot; always fall back</span>
+          </div>
+
+          <button id="go" class="btn primary wide">Classify query</button>
+        </div>
+
+        <div class="card result" id="resultCard">
+          <div class="empty" id="resultEmpty">
+            <div class="empty-mark"></div>
+            <h3>No query yet</h3>
+            <p>Your prediction, confidence and the desk it would be routed to will appear here.</p>
+          </div>
+          <div id="resultBody" class="hidden"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row between">
+          <h2>Session history</h2>
+          <button class="link" id="clearHist" type="button">clear</button>
+        </div>
+        <div id="history" class="history"><p class="muted small">Nothing yet.</p></div>
+      </div>
+    </section>
+
+    <!-- COMPARE -->
+    <section id="tab-compare" class="panel">
+      <div class="card">
+        <h2>Run one query through every trained model</h2>
+        <div class="row gap">
+          <input id="cmpQuery" type="text" maxlength="500" placeholder="e.g. my payment failed but money was deducted">
+          <button id="cmpGo" class="btn primary">Compare</button>
+        </div>
+        <p class="muted small">Each model uses its own tuned fallback threshold. Disagreements are highlighted.</p>
+      </div>
+      <div id="cmpOut" class="cmp-grid"></div>
+    </section>
+
+    <!-- BENCHMARKS -->
+    <section id="tab-bench" class="panel">
+      <div id="benchEmpty" class="card hidden">
+        <h2>No results yet</h2>
+        <p class="muted">Run <code>python train.py</code> and refresh this page.</p>
+      </div>
+      <div id="benchBody">
+        <div class="card"><h2>Leaderboard <span class="muted small" id="dsInfo"></span></h2><div class="table-wrap"><table id="leader"></table></div></div>
+        <div class="grid-2">
+          <div class="card"><h2>Accuracy &amp; macro-F1</h2><div id="barChart"></div></div>
+          <div class="card">
+            <div class="row between"><h2>Fallback trade-off</h2><select id="benchModel"></select></div>
+            <div id="sweepChart"></div>
+            <p class="muted small">Dashed line = threshold tuned on validation data. Higher threshold &rarr; fewer wrong answers, more hand-offs to humans.</p>
+          </div>
+        </div>
+        <div class="card"><h2>Confusion matrix <span class="muted small">(test set, selected model)</span></h2><div id="cm"></div></div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="tab-about" class="panel">
+      <div class="card prose">
+        <h2>How it works</h2>
+        <ol>
+          <li><b>Data.</b> Institutional helpdesk queries labelled <i>account, certification, complaint, process, technical</i>. Built-in corpus by default, or real CLINC150 / Kaggle intent data mapped onto those categories.</li>
+          <li><b>Models.</b> A TF-IDF + logistic regression baseline, Bi-GRU and Bi-LSTM networks trained from scratch, and a fine-tuned BERT.</li>
+          <li><b>Confidence.</b> Each model outputs class probabilities. The top probability is the confidence.</li>
+          <li><b>Fallback.</b> If confidence is below the threshold, the query goes to a human agent instead of a possibly-wrong desk. The threshold is tuned on validation data using genuine out-of-scope queries (weather, jokes, sports&hellip;) the models never trained on.</li>
+        </ol>
+        <p class="muted">Tip: try &ldquo;What's the weather today?&rdquo; &mdash; a good model should refuse to guess.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>Helpdesk Intent Assistant &middot; TF-IDF &middot; GRU / LSTM &middot; BERT &middot; confidence fallback</footer>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Helpdesk Web App",
+			"type": "shell",
+			"command": "C:\\Users\\Sanskriti\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
+			"args": [
+				"app.py"
+			],
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}
